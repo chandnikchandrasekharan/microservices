@@ -1,0 +1,22 @@
+server:
+    port: 8082
+spring:
+    datasource:
+        password: root
+        url: jdbc:mysql://localhost:3306/employeesdatabase?useSSL=false
+        username: root
+    jpa:
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQLDialect
+                
+# Test Details for Production Environment
+test:
+  details: Employee service details for production environment
+  engineer: Alice Johnson
+  department: Production Testing
+  engineerContact:
+    email: testengineer.prd@example.com
+    phone: 555-123-4567

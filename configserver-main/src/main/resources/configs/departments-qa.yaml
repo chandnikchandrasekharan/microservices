@@ -1,0 +1,23 @@
+server:
+    port: 8081
+spring:
+    datasource:
+        password: root
+        url: jdbc:mysql://localhost:3306/deptdatabase?useSSL=false
+        username: root
+    jpa:
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQLDialect
+        show-sql: true
+      
+# Test Details for QA Environment
+test:
+  details: Department service details for QA environment
+  engineer: Jane Smith
+  department: QA Testing [Dept service]
+  engineerContact:
+    email: qaenigneer.qa@example.com
+    phone: 111-773-7890       

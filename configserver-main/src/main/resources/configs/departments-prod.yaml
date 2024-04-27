@@ -1,0 +1,23 @@
+server:
+    port: 8081
+spring:
+    datasource:
+        password: root
+        url: jdbc:mysql://localhost:3306/deptdatabase?useSSL=false
+        username: root
+    jpa:
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQLDialect
+        show-sql: true
+      
+# Test Details for Prod Environment
+test:
+  details: Department service details for Prod environment
+  engineer: Alice Johnson
+  department: Prod Testing [Dept service]
+  engineerContact:
+    email: alice01.prd@example.com
+    phone: 111-431-7890       
