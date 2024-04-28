@@ -1,16 +1,17 @@
 package com.shop.cartinventory.controller;
 
 import com.shop.cartinventory.entity.CartItem;
-import com.shop.cartinventory.entity.Product;
-import com.shop.cartinventory.repository.CartItemRepository;
-
-
+import com.shop.cartinventory.service.CartService;
 import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-
+import org.springframework.lang.NonNull;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -18,75 +19,37 @@ import java.util.List;
 @RequestMapping("/api/cartInventory")
 public class CartItemController {
 
-    @Autowired
-    private CartItemRepository cartItemRepository;
+    private final CartService cartService;
 
-    @Autowired
-    private RestTemplate restTemplate; // Used for making HTTP requests to the Product Service
+    public CartItemController(CartService cartService) {
+        this.cartService = cartService;
+    }
 
-    private static final String PRODUCT_SERVICE_URL = "http://localhost:8082/api/products/";
 
     @GetMapping
     public List<CartItem> getAllCartItems() {
-        return cartItemRepository.findAll();
+        return cartService.getAllItem();
     }
 
     @GetMapping("/{id}")
-    public CartItem getCartItemById(@PathVariable Long id) {
-        return cartItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cart item not found with id: " + id));
+    public CartItem getCartItemById(@PathVariable @NonNull Long id) {
+        return cartService.getItemById(id);
     }
-    
-    
+
+
     @PostMapping
-    public CartItem createCartItem(@Valid @RequestBody CartItem cartItem) {
-        // Call Product Service to fetch product information
-        Product product = restTemplate.getForObject(PRODUCT_SERVICE_URL + cartItem.getProductId(), Product.class);
-        if (product == null) {
-            throw new RuntimeException("Product not found with id: " + cartItem.getProductId());
-        }
-        // Check if enough quantity is available
-        if (product.getQuantity() < cartItem.getQuantity()) {
-            throw new RuntimeException("Not enough quantity available for product: " + product.getName());
-        }
-        // Update product quantity
-        product.setQuantity(product.getQuantity() - cartItem.getQuantity());
-        restTemplate.put(PRODUCT_SERVICE_URL + cartItem.getProductId(), product); // Update product quantity
-        // Save cart item to database
-        return cartItemRepository.save(cartItem);
+    public CartItem createCartItem(@Valid @NonNull @RequestBody CartItem cartItem) {
+        return cartService.addToCart(cartItem);
     }
 
 
     @PutMapping("/{id}")
     public CartItem updateCartItem(@PathVariable Long id, @Valid @RequestBody CartItem cartItemDetails) {
-        CartItem cartItem = cartItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cart item not found with id: " + id));
-
-        // Call Product Service to fetch product information
-        Product product = restTemplate.getForObject(PRODUCT_SERVICE_URL + cartItemDetails.getProductId(), Product.class);
-        if (product == null) {
-            throw new RuntimeException("Product not found with id: " + cartItemDetails.getProductId());
-        }
-
-        // Check if enough quantity is available
-        if (product.getQuantity() < cartItemDetails.getQuantity()) {
-            throw new RuntimeException("Not enough quantity available for product: " + product.getName());
-        }
-
-        // Update product quantity
-        product.setQuantity(product.getQuantity() - cartItemDetails.getQuantity());
-        restTemplate.put(PRODUCT_SERVICE_URL + cartItemDetails.getProductId(), product); // Update product quantity
-
-        // Update cart item details
-        cartItem.setProductId(cartItemDetails.getProductId());
-        cartItem.setQuantity(cartItemDetails.getQuantity());
-        // Update other attributes if needed
-
-        return cartItemRepository.save(cartItem);
+        return cartService.updateCart(id,cartItemDetails);
     }
 
     @DeleteMapping("/{id}")
     public void deleteCartItem(@PathVariable Long id) {
-        cartItemRepository.deleteById(id);
+        cartService.removeFromCart(id);
     }
 }
